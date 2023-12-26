@@ -6,7 +6,7 @@ import dlib
 from PIL import Image, ImageTk
 
 from dataBaseConnect import connection
-from encode_and_compare import encode_faces, compare_encodings
+from encode_and_compare import encode_face, compare_encodings
 
 
 def check_duplicate_encodings(encoding):
@@ -31,7 +31,7 @@ def add_to_db(cam, name_entry):
         ret, image = cam.read()
 
         if ret:
-            encodings = encode_faces(image, face_detector)
+            encodings = encode_face(image, face_detector)
 
             if len(encodings) > 0:
                 byte_data = pickle.dumps(encodings)
