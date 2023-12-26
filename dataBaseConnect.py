@@ -4,8 +4,8 @@ connection = psycopg2.connect(
     host='localhost',
     port='5432',
     database='faceData',
-    user='user',
-    password='12345',
+    user='postgres',
+    password='123',
 )
 
 # docker compose -f faceDataBase/postgres/docker-compose.yml up -d

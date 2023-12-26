@@ -1,17 +1,12 @@
 import cv2
-import dlib
 import pickle
 from dataBaseConnect import connection
-from settings import skipping_frames, frame_count, cam_port
 from encode_and_compare import compare_encodings
+import settings
 
 
 def show_face_recognition():
-    cam = cv2.VideoCapture(cam_port)
-
-    face_detector = dlib.get_frontal_face_detector()
-    shape_predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
-    face_recognizer = dlib.face_recognition_model_v1("dlib_face_recognition_resnet_model_v1.dat")
+    cam = cv2.VideoCapture(settings.cam_port)
 
     count = 0
 
@@ -23,7 +18,7 @@ def show_face_recognition():
         if result:
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 
-            faces = face_detector(gray)
+            faces = settings.face_detector(gray)
 
             encodings = []
 
@@ -34,9 +29,9 @@ def show_face_recognition():
                 x, y, w, h = face.left(), face.top(), face.width(), face.height()
                 cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0), 2)
 
-                if (not skipping_frames) or (skipping_frames and count % frame_count == 0):
-                    landmarks = shape_predictor(gray, face)
-                    encoding = face_recognizer.compute_face_descriptor(image, landmarks)
+                if (not settings.skipping_frames) or (settings.skipping_frames and count % settings.frame_count == 0):
+                    landmarks = settings.shape_predictor(gray, face)
+                    encoding = settings.face_recognizer.compute_face_descriptor(image, landmarks)
                     encodings.append(encoding)
 
                     found_match = False

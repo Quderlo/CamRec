@@ -4,6 +4,7 @@ import cv2
 from settings import cam_port
 from face_recognition import show_face_recognition
 
+
 def retake_camera_photo():
     back_to_menu_from_database()
     go_to_add_to_database()

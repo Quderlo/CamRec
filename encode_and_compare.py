@@ -1,6 +1,6 @@
-import cv2
-import dlib
+import pickle
 import numpy as np
+import settings
 
 
 def compare_encodings(encoding, encodings_in_db):
@@ -10,17 +10,10 @@ def compare_encodings(encoding, encodings_in_db):
     return np.any(matches)
 
 
-def encode_faces(image, face_detector):
-    shape_predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
-    face_recognizer = dlib.face_recognition_model_v1("dlib_face_recognition_resnet_model_v1.dat")
+def encode_face(image, gray, face):
+    landmarks = settings.shape_predictor(gray, face)
+    encoding = settings.face_recognizer.compute_face_descriptor(image, landmarks)
 
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    faces = face_detector(gray)
-    encodings = []
+    return encoding
 
-    for face in faces:
-        landmarks = shape_predictor(gray, face)
-        encoding = face_recognizer.compute_face_descriptor(image, landmarks)
-        encodings.append(encoding)
 
-    return encodings
