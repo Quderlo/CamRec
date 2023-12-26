@@ -10,3 +10,5 @@ shape_predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 face_recognizer = dlib.face_recognition_model_v1("dlib_face_recognition_resnet_model_v1.dat")
 
 face_rectangle_color = (255, 255, 255)
+# Погрешность лиц
+distance_threshold = 0.8

@@ -3,7 +3,7 @@ import sqlite3
 import tkinter as tk
 from PIL import Image, ImageTk
 import cv2
-import threading
+
 import settings
 from encode_and_compare import encode_face, compare_encodings
 
@@ -27,9 +27,6 @@ class FaceRecognition(tk.Frame):
 
         self.start_face_recognition_id = None
         self.show_video_id = None
-
-        self.processing_thread = None
-        self.thread_event = threading.Event()
 
     def return_to_main_menu(self):
         self.return_to_main_menu_btn.pack_forget()
@@ -74,83 +71,57 @@ class FaceRecognition(tk.Frame):
         self.start_face_recognition_id = self.after(50, self.start_face_recognition)
 
     def start_face_recognition(self):
-        while not self.thread_event.is_set():
-            try:
-                encodings = []
 
-                rows = None
+        encodings = []
 
-                try:
-                    self.recognition_window.cursor.execute("SELECT name, encodings FROM face_encodings")
-                    rows = self.recognition_window.cursor.fetchall()
-                except sqlite3.Error as sql_error:
-                    print(f"SQLite error: {sql_error}. In start_face_recognition")
-                except Exception as ex:
-                    print(f"Error: {ex}. In start_face_recognition")
+        rows = None
 
-                try:
-                    encodings.append(encode_face(self.image, self.gray, self.faces))
+        try:
+            self.recognition_window.cursor.execute("SELECT name, encodings FROM face_encodings")
+            rows = self.recognition_window.cursor.fetchall()
+        except sqlite3.Error as sql_error:
+            print(f"SQLite error: {sql_error}. In start_face_recognition")
+        except Exception as ex:
+            print(f"Error: {ex}. In start_face_recognition")
 
-                    for face in self.faces:
-                        x, y, w, h = face.left(), face.top(), face.width(), face.height()
-                        cv2.rectangle(self.image, (x, y), (x + w, y + h), settings.face_rectangle_color, 2)
+        try:
+            encodings.append(encode_face(self.image, self.gray, self.faces))
 
-                        found_match = False
-                        name = None
-                        print(rows)
-                        for row in rows:
-                            db_encodings = pickle.loads(row[1])
-                            if compare_encodings(encodings, db_encodings):
-                                name = row[0]
-                                found_match = True
-                                break
+            for face in self.faces:
+                x, y, w, h = face.left(), face.top(), face.width(), face.height()
+                cv2.rectangle(self.image, (x, y), (x + w, y + h), settings.face_rectangle_color, 2)
 
-                        if found_match and name:
-                            cv2.putText(self.image, name, (x, y + h + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
-                        elif len(encodings) >= 0:
-                            cv2.putText(self.image, "Neznakomec", (x, y + h + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255),
-                                        2)
-                except Exception as ex:
-                    print(f"Error: {ex}. Can't put Text in image")
+                found_match = False
+                name = None
+                print(rows)
+                for row in rows:
+                    db_encodings = pickle.loads(row[1])
+                    if compare_encodings(encodings, db_encodings):
+                        name = row[0]
+                        found_match = True
+                        break
 
-                # self.show_video_id = self.after(100, self.show_video)
-                try:
-                    img = Image.fromarray(cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB))
-                    imgtk = ImageTk.PhotoImage(image=img)
+                if found_match and name:
+                    cv2.putText(self.image, name, (x, y + h + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 2)
+                elif len(encodings) >= 0:
+                    cv2.putText(self.image, "Neznakomec", (x, y + h + 30), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255),
+                                2)
+        except Exception as ex:
+            print(f"Error: {ex}. Can't put Text in image")
 
-                    self.video_label.imgtk = imgtk
-                    self.video_label.configure(image=imgtk)
-                except tk.TclError as tcl_error:
-                    print(f"TclError: {tcl_error}. In start_face_recognition")
-                except Exception as ex:
-                    print(f"Error: {ex}. Can't display image or image is not found. In start_face_recognition")
-
-                self.get_faces()
-                self.thread_event.wait(0.05)
-            except Exception as ex:
-                print(f"Error processing images: {ex}")
-
-    def update_gui_with_processed_images(self):
+        # self.show_video_id = self.after(100, self.show_video)
         try:
             img = Image.fromarray(cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB))
             imgtk = ImageTk.PhotoImage(image=img)
 
             self.video_label.imgtk = imgtk
             self.video_label.configure(image=imgtk)
-            self.recognition_window.update()
         except tk.TclError as tcl_error:
             print(f"TclError: {tcl_error}. In start_face_recognition")
         except Exception as ex:
-            print(f"Error updating GUI: {ex}")
+            print(f"Error: {ex}. Can't display image or image is not found. In start_face_recognition")
 
-    # def show_video(self):
-    #     img = Image.fromarray(cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB))
-    #     imgtk = ImageTk.PhotoImage(image=img)
-    #
-    #     self.video_label.imgtk = imgtk
-    #     self.video_label.configure(image=imgtk)
-    #
-    #     self.get_faces()
+        self.get_faces()
 
     def start_recognition(self):
         self.get_faces()

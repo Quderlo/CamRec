@@ -5,9 +5,10 @@ from dataBaseConnect import connection
 
 
 def compare_encodings(encoding, encodings_in_db):
-    distance_threshold = 0.5
+    distance_threshold = settings.distance_threshold
     distances = np.linalg.norm(np.array(encodings_in_db) - np.array(encoding), axis=1)
     matches = distances <= distance_threshold
+    print(matches)
     return np.any(matches)
 
 
