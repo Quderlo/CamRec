@@ -107,7 +107,6 @@ class FaceRecognition(tk.Frame):
         except Exception as ex:
             print(f"Error: {ex}. Can't put Text in image")
 
-        # self.show_video_id = self.after(100, self.show_video)
         try:
             img = Image.fromarray(cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB))
             imgtk = ImageTk.PhotoImage(image=img)

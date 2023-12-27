@@ -72,7 +72,6 @@ class AddToDatabase(tk.Frame):
         self.name_label.pack()
         self.name_entry.pack()
         self.take_photo_btn.pack()
-        # self.recognition_window.cursor.execute("SELECT name, encodings FROM face_encodings")
 
     def get_faces(self):
         self.image = None
@@ -110,6 +109,8 @@ class AddToDatabase(tk.Frame):
         self.add_to_database_btn.pack_forget()
         self.showing_photo = False
 
+        name = ""
+
         try:
             name = self.name_entry.get()
 
@@ -125,8 +126,6 @@ class AddToDatabase(tk.Frame):
         # try:
         if len(encodings) > 0:
             byte_data = pickle.dumps(encodings)
-            print("Кодировки лиц в байтах:", byte_data)
-            print("Лицо найдено")
 
             if not check_duplicate_encodings(encodings):
                 self.recognition_window.cursor.execute(
@@ -144,8 +143,6 @@ class AddToDatabase(tk.Frame):
                                                                                  "зарегистрирован")
         else:
             messagebox.showerror(title="Не удалось добавить в базу", message="Не обнаружено лицо на кадре")
-        # except:
-        #     print("Error: Something went wrong at adding in database")
 
         self.get_faces()
 
