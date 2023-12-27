@@ -49,6 +49,7 @@ class FaceRecognition(tk.Frame):
             self.cam = cv2.VideoCapture(settings.cam_port)
 
         self.video_label.pack()
+        self.return_to_main_menu_btn.pack()
 
         self.recognition_window.cursor.execute("SELECT name, encodings FROM face_encodings")
 
@@ -72,8 +73,6 @@ class FaceRecognition(tk.Frame):
 
     def start_face_recognition(self):
 
-        encodings = []
-
         rows = None
 
         try:
@@ -85,7 +84,7 @@ class FaceRecognition(tk.Frame):
             print(f"Error: {ex}. In start_face_recognition")
 
         try:
-            encodings.append(encode_face(self.image, self.gray, self.faces))
+            encodings = (encode_face(self.image, self.gray, self.faces))
 
             for face in self.faces:
                 x, y, w, h = face.left(), face.top(), face.width(), face.height()
@@ -93,7 +92,6 @@ class FaceRecognition(tk.Frame):
 
                 found_match = False
                 name = None
-                print(rows)
                 for row in rows:
                     db_encodings = pickle.loads(row[1])
                     if compare_encodings(encodings, db_encodings):

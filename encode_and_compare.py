@@ -4,20 +4,18 @@ import settings
 from dataBaseConnect import connection
 
 
-def compare_encodings(encoding, encodings_in_db):
-    distance_threshold = settings.distance_threshold
-    distances = np.linalg.norm(np.array(encodings_in_db) - np.array(encoding), axis=1)
-    matches = distances <= distance_threshold
-    print(matches)
-    return np.any(matches)
+def compare_encodings(encodings, encodings_in_db):
+    distances = np.linalg.norm(np.array(encodings_in_db) - np.array(encodings), axis=1)
+
+    if distances <= settings.distance_threshold:
+        return True
+
+    return False
 
 
 def encode_face(image, gray, faces):
     if not faces:
         return []
-
-    landmarks = settings.shape_predictor(gray, faces[0])
-    encoding = settings.face_recognizer.compute_face_descriptor(image, landmarks)
 
     encodings = []
 
@@ -31,6 +29,9 @@ def encode_face(image, gray, faces):
 
 def check_duplicate_encodings(encoding):
     cursor = connection.cursor()
+    cursor.execute(
+        "CREATE TABLE IF NOT EXISTS face_encodings (id SERIAL PRIMARY KEY, name VARCHAR(255), encodings BYTEA)"
+    )
     cursor.execute("SELECT encodings FROM face_encodings")
     encodings_in_db = cursor.fetchall()
 

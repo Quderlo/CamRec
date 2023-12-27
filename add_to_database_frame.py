@@ -37,6 +37,9 @@ class AddToDatabase(tk.Frame):
         self.retake_photo = tk.Button(self, text="Переснять фото", command=self.retake_photo)
         self.add_to_database_btn = tk.Button(self, text="Добавить в базу", command=self.add_to_database)
 
+        self.name_label = tk.Label(self, text="Введите имя")
+        self.name_entry = tk.Entry(self)
+
     def return_to_main_menu(self):
         self.return_to_main_menu_btn.pack_forget()
         self.recognition_window.go_to_database_frame_btn.pack()
@@ -47,6 +50,9 @@ class AddToDatabase(tk.Frame):
         self.retake_photo.pack_forget()
         self.add_to_database_btn.pack_forget()
         self.showing_photo = False
+
+        self.name_label.pack_forget()
+        self.name_entry.pack_forget()
 
         if self.start_face_recognition_id is not None:
             self.after_cancel(self.start_face_recognition_id)
@@ -63,9 +69,10 @@ class AddToDatabase(tk.Frame):
 
         self.return_to_main_menu_btn.pack()
         self.video_label.pack()
+        self.name_label.pack()
+        self.name_entry.pack()
         self.take_photo_btn.pack()
-
-        self.recognition_window.cursor.execute("SELECT name, encodings FROM face_encodings")
+        # self.recognition_window.cursor.execute("SELECT name, encodings FROM face_encodings")
 
     def get_faces(self):
         self.image = None
@@ -103,7 +110,15 @@ class AddToDatabase(tk.Frame):
         self.add_to_database_btn.pack_forget()
         self.showing_photo = False
 
-        name = "Lev"
+        try:
+            name = self.name_entry.get()
+
+            if len(name) <= 1:
+                messagebox.showinfo(title="Ошибка", message=f"Вы не ввели имя")
+                self.get_faces()
+                return
+        except Exception as e:
+            print(f"Error: {e}. Tkinter Entry errror. Name is not definite or is NonTypeObject.")
 
         encodings = encode_face(self.image, self.gray, self.faces)
 
