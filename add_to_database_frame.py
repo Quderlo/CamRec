@@ -20,18 +20,17 @@ class AddToDatabase(tk.Frame):
                                                  command=self.return_to_main_menu)
         self.return_to_main_menu_btn.pack()
 
-        self.cam = None
+        self.cam = cv2.VideoCapture(settings.cam_port)
 
         self.video_label = tk.Label(self.recognition_window)
 
         self.take_photo_btn = tk.Button(self, text="Сделать снимок", command=self.take_photo)
 
-        self.image = None
-        self.gray = None
-        self.faces = None
+        self.faces = []
+        result, self.image = self.cam.read()
+        self.gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
 
         self.start_face_recognition_id = None
-        self.show_video_id = None
         self.showing_photo = False
 
         self.retake_photo = tk.Button(self, text="Переснять фото", command=self.retake_photo)
@@ -56,12 +55,9 @@ class AddToDatabase(tk.Frame):
 
         if self.start_face_recognition_id is not None:
             self.after_cancel(self.start_face_recognition_id)
-        if self.show_video_id is not None:
-            self.after_cancel(self.show_video_id)
 
         self.cam.release()
         cv2.destroyAllWindows()
-        self.cam = None
 
     def get_cursor(self):
         if self.cam is None:
@@ -74,15 +70,12 @@ class AddToDatabase(tk.Frame):
         self.take_photo_btn.pack()
 
     def get_faces(self):
-        self.image = None
-        self.gray = None
-        self.faces = None
-
         result, self.image = self.cam.read()
 
         try:
             self.gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
             self.faces = settings.face_detector(self.gray)
+
         except cv2.error as e:
             print(f"OpenCV error: {e}. In get_faces_images.")
         except Exception as ex:
@@ -94,12 +87,15 @@ class AddToDatabase(tk.Frame):
         for face in self.faces:
             x, y, w, h = face.left(), face.top(), face.width(), face.height()
             cv2.rectangle(self.image, (x, y), (x + w, y + h), settings.face_rectangle_color, 2)
+        try:
+            img = Image.fromarray(cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB))
+            imgtk = ImageTk.PhotoImage(image=img)
 
-        img = Image.fromarray(cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB))
-        imgtk = ImageTk.PhotoImage(image=img)
+            self.video_label.imgtk = imgtk
+            self.video_label.configure(image=imgtk)
 
-        self.video_label.imgtk = imgtk
-        self.video_label.configure(image=imgtk)
+        except cv2.error as e:
+            print(f"OpenCV error: {e}. In outline_face.")
 
         if not self.showing_photo:
             self.get_faces()
@@ -119,7 +115,7 @@ class AddToDatabase(tk.Frame):
                 self.get_faces()
                 return
         except Exception as e:
-            print(f"Error: {e}. Tkinter Entry errror. Name is not definite or is NonTypeObject.")
+            print(f"Error: {e}. Tkinter Entry errror. Name is not definite or is NonType.")
 
         encodings = encode_face(self.image, self.gray, self.faces)
 

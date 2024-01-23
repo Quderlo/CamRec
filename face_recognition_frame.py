@@ -63,6 +63,7 @@ class FaceRecognition(tk.Frame):
         try:
             self.gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
             self.faces = settings.face_detector(self.gray)
+            # cv2.imshow("img", self.gray)
         except cv2.error as e:
             print(f"OpenCV error: {e}. In get_faces_images.")
 

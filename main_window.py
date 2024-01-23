@@ -8,7 +8,7 @@ from add_to_database_frame import AddToDatabase
 class RecognitionWindow(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Распознование лиц")
+        self.title("Распознавание лиц")
         self.geometry(settings.window_size)
         self.attributes("-topmost", True)
         self.face_recognition_frame = FaceRecognition(self)
@@ -18,7 +18,7 @@ class RecognitionWindow(tk.Tk):
                                                   command=self.go_to_add_to_database)
         self.go_to_database_frame_btn.pack()
 
-        self.go_to_recognition_frame_btn = tk.Button(self, text="Распознование лиц",
+        self.go_to_recognition_frame_btn = tk.Button(self, text="Распознавание лиц",
                                                      command=self.go_to_face_recognition)
         self.go_to_recognition_frame_btn.pack()
 
