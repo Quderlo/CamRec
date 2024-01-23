@@ -29,7 +29,7 @@ class RecognitionWindow(tk.Tk):
         self.go_to_recognition_frame_btn.pack_forget()
 
         self.database_frame.pack()
-        self.database_frame.get_cursor()
+        self.database_frame.start_widget()
         self.database_frame.start_frame()
 
     def go_to_face_recognition(self):
@@ -37,7 +37,7 @@ class RecognitionWindow(tk.Tk):
         self.go_to_recognition_frame_btn.pack_forget()
 
         self.face_recognition_frame.pack()
-        self.face_recognition_frame.get_cursor()
+        self.face_recognition_frame.start_widget()
         self.face_recognition_frame.start_recognition()
 
 

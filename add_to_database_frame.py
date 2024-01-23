@@ -26,9 +26,9 @@ class AddToDatabase(tk.Frame):
 
         self.take_photo_btn = tk.Button(self, text="Сделать снимок", command=self.take_photo)
 
-        self.faces = []
-        result, self.image = self.cam.read()
-        self.gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
+        self.faces = None
+        self.image = None
+        self.gray = None
 
         self.start_face_recognition_id = None
         self.showing_photo = False
@@ -59,7 +59,7 @@ class AddToDatabase(tk.Frame):
         self.cam.release()
         cv2.destroyAllWindows()
 
-    def get_cursor(self):
+    def start_widget(self):
         if self.cam is None:
             self.cam = cv2.VideoCapture(settings.cam_port)
 

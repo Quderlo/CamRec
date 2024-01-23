@@ -44,7 +44,7 @@ class FaceRecognition(tk.Frame):
         cv2.destroyAllWindows()
         self.cam = None
 
-    def get_cursor(self):
+    def start_widget(self):
         if self.cam is None:
             self.cam = cv2.VideoCapture(settings.cam_port)
 
