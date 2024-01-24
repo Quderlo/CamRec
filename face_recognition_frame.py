@@ -24,9 +24,9 @@ class FaceRecognition(tk.Frame):
         self.image = None
         self.gray = None
         self.faces = None
+        self.rows = None
 
         self.start_face_recognition_id = None
-        self.show_video_id = None
 
     def return_to_main_menu(self):
         self.return_to_main_menu_btn.pack_forget()
@@ -37,12 +37,9 @@ class FaceRecognition(tk.Frame):
 
         if self.start_face_recognition_id is not None:
             self.after_cancel(self.start_face_recognition_id)
-        if self.show_video_id is not None:
-            self.after_cancel(self.show_video_id)
 
         self.cam.release()
         cv2.destroyAllWindows()
-        self.cam = None
 
     def start_widget(self):
         if self.cam is None:
@@ -51,7 +48,14 @@ class FaceRecognition(tk.Frame):
         self.video_label.pack()
         self.return_to_main_menu_btn.pack()
 
-        self.recognition_window.cursor.execute("SELECT name, encodings FROM face_encodings")
+        try:
+            self.recognition_window.cursor.execute("SELECT name, encodings FROM face_encodings")
+            self.rows = self.recognition_window.cursor.fetchall()
+            # print(rows)
+        except sqlite3.Error as sql_error:
+            print(f"SQLite error: {sql_error}. In start_face_recognition")
+        except Exception as ex:
+            print(f"Error: {ex}. In start_face_recognition")
 
     def get_faces(self):
         self.image = None
@@ -60,29 +64,30 @@ class FaceRecognition(tk.Frame):
 
         result, self.image = self.cam.read()
 
+        if not result or self.image is None:
+            print(f"Warning: Unable to read video feed")
+
         try:
             self.gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
             self.faces = settings.face_detector(self.gray)
-            # cv2.imshow("img", self.gray)
+            cv2.imshow("img", self.gray)
         except cv2.error as e:
             print(f"OpenCV error: {e}. In get_faces_images.")
 
         except Exception as ex:
             print(f"Error: {ex}. In get_faces_images.")
 
-        self.start_face_recognition_id = self.after(50, self.start_face_recognition)
+        self.start_face_recognition()
 
     def start_face_recognition(self):
 
-        rows = None
+        if self.faces is None:
+            print(f"Warning: Faces is NonType")
+            return
 
-        try:
-            self.recognition_window.cursor.execute("SELECT name, encodings FROM face_encodings")
-            rows = self.recognition_window.cursor.fetchall()
-        except sqlite3.Error as sql_error:
-            print(f"SQLite error: {sql_error}. In start_face_recognition")
-        except Exception as ex:
-            print(f"Error: {ex}. In start_face_recognition")
+        if len(self.faces) > 1:
+            print(f"Warning: More than one person in the frame")
+            return
 
         try:
             encodings = (encode_face(self.image, self.gray, self.faces))
@@ -93,7 +98,7 @@ class FaceRecognition(tk.Frame):
 
                 found_match = False
                 name = None
-                for row in rows:
+                for row in self.rows:
                     db_encodings = pickle.loads(row[1])
                     if compare_encodings(encodings, db_encodings):
                         name = row[0]
@@ -118,8 +123,6 @@ class FaceRecognition(tk.Frame):
             print(f"TclError: {tcl_error}. In start_face_recognition")
         except Exception as ex:
             print(f"Error: {ex}. Can't display image or image is not found. In start_face_recognition")
-
-        self.get_faces()
 
     def start_recognition(self):
         self.get_faces()

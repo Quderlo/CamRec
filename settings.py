@@ -12,3 +12,5 @@ face_recognizer = dlib.face_recognition_model_v1("dlib_face_recognition_resnet_m
 face_rectangle_color = (255, 255, 255)
 # Погрешность лиц
 distance_threshold = 0.55
+
+

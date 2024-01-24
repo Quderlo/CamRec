@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import messagebox
 
 import cv2
+import numpy as np
 from PIL import ImageTk, Image
 
 import settings
@@ -74,6 +75,7 @@ class AddToDatabase(tk.Frame):
 
         try:
             self.gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
+            # np.savetxt('result.txt', self.gray, fmt='%3d', delimiter='\t')
             self.faces = settings.face_detector(self.gray)
 
         except cv2.error as e:
@@ -117,16 +119,14 @@ class AddToDatabase(tk.Frame):
         except Exception as e:
             print(f"Error: {e}. Tkinter Entry errror. Name is not definite or is NonType.")
 
+        self.name_entry.delete(0, tk.END)
         encodings = encode_face(self.image, self.gray, self.faces)
 
-        # try:
         if len(encodings) > 0:
-            byte_data = pickle.dumps(encodings)
 
             if not check_duplicate_encodings(encodings):
-                self.recognition_window.cursor.execute(
-                    "CREATE TABLE IF NOT EXISTS face_encodings (id SERIAL PRIMARY KEY, name VARCHAR(255), encodings BYTEA)"
-                )
+                byte_data = pickle.dumps(encodings)
+
                 self.recognition_window.cursor.execute(
                     "INSERT INTO face_encodings (name, encodings) VALUES (%s, %s)",
                     (name, byte_data)

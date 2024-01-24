@@ -39,6 +39,3 @@ class RecognitionWindow(tk.Tk):
         self.face_recognition_frame.pack()
         self.face_recognition_frame.start_widget()
         self.face_recognition_frame.start_recognition()
-
-
-
