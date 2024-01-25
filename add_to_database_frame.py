@@ -3,7 +3,6 @@ import tkinter as tk
 from tkinter import messagebox
 
 import cv2
-import numpy as np
 from PIL import ImageTk, Image
 
 import settings
@@ -59,10 +58,9 @@ class AddToDatabase(tk.Frame):
 
         self.cam.release()
         cv2.destroyAllWindows()
+        self.cam = None
 
     def start_widget(self):
-        if self.cam is None:
-            self.cam = cv2.VideoCapture(settings.cam_port)
 
         self.return_to_main_menu_btn.pack()
         self.video_label.pack()
@@ -71,6 +69,9 @@ class AddToDatabase(tk.Frame):
         self.take_photo_btn.pack()
 
     def get_faces(self):
+        if self.cam is None:
+            self.cam = cv2.VideoCapture(settings.cam_port)
+
         result, self.image = self.cam.read()
 
         try:
@@ -105,6 +106,7 @@ class AddToDatabase(tk.Frame):
     def add_to_database(self):
         self.retake_photo.pack_forget()
         self.add_to_database_btn.pack_forget()
+        self.take_photo_btn.pack()
         self.showing_photo = False
 
         name = ""
@@ -144,12 +146,14 @@ class AddToDatabase(tk.Frame):
 
     def take_photo(self):
         self.retake_photo.pack()
+        self.take_photo_btn.pack_forget()
         self.add_to_database_btn.pack()
         self.showing_photo = True
 
     def retake_photo(self):
         self.retake_photo.pack_forget()
         self.add_to_database_btn.pack_forget()
+        self.take_photo_btn.pack()
         self.showing_photo = False
         self.get_faces()
 

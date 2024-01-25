@@ -26,7 +26,8 @@ class FaceRecognition(tk.Frame):
         self.faces = None
         self.rows = None
 
-        self.start_face_recognition_id = None
+        self.face_recognition = True
+        self.process_id = None
 
     def return_to_main_menu(self):
         self.return_to_main_menu_btn.pack_forget()
@@ -34,19 +35,20 @@ class FaceRecognition(tk.Frame):
         self.recognition_window.go_to_recognition_frame_btn.pack()
         self.pack_forget()
         self.video_label.pack_forget()
-
-        if self.start_face_recognition_id is not None:
-            self.after_cancel(self.start_face_recognition_id)
+        self.face_recognition = False
 
         self.cam.release()
         cv2.destroyAllWindows()
+        self.cam = None
+
+        if self.process_id is not None:
+            self.after_cancel(self.process_id)
 
     def start_widget(self):
-        if self.cam is None:
-            self.cam = cv2.VideoCapture(settings.cam_port)
-
         self.video_label.pack()
         self.return_to_main_menu_btn.pack()
+
+        self.face_recognition = True
 
         try:
             self.recognition_window.cursor.execute("SELECT name, encodings FROM face_encodings")
@@ -62,6 +64,9 @@ class FaceRecognition(tk.Frame):
         self.gray = None
         self.faces = None
 
+        if self.cam is None:
+            self.cam = cv2.VideoCapture(settings.cam_port)
+
         result, self.image = self.cam.read()
 
         if not result or self.image is None:
@@ -70,14 +75,11 @@ class FaceRecognition(tk.Frame):
         try:
             self.gray = cv2.cvtColor(self.image, cv2.COLOR_BGR2GRAY)
             self.faces = settings.face_detector(self.gray)
-            cv2.imshow("img", self.gray)
         except cv2.error as e:
             print(f"OpenCV error: {e}. In get_faces_images.")
 
         except Exception as ex:
             print(f"Error: {ex}. In get_faces_images.")
-
-        self.start_face_recognition()
 
     def start_face_recognition(self):
 
@@ -126,3 +128,7 @@ class FaceRecognition(tk.Frame):
 
     def start_recognition(self):
         self.get_faces()
+        self.start_face_recognition()
+
+        if self.face_recognition:
+            self.process_id = self.recognition_window.after(100, self.start_recognition)
